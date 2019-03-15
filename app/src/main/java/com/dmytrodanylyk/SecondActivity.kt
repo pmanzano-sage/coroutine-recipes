@@ -3,7 +3,7 @@ package com.dmytrodanylyk
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.dmytrodanylyk.examples.LongRunningJob
-import kotlinx.android.synthetic.main.activity_second.*
+import kotlinx.android.synthetic.main.include_long_run.*
 
 class SecondActivity : AppCompatActivity(), LongRunningJob.TaskCallbacks {
 
@@ -18,9 +18,8 @@ class SecondActivity : AppCompatActivity(), LongRunningJob.TaskCallbacks {
     }
 
     fun updateCounter(progress: String) {
-        counter.text = progress
+        longRunCounter.text = progress
     }
-
 
     override fun onResume(){
         super.onResume()

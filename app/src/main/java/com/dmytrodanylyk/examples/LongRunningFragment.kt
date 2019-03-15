@@ -5,21 +5,26 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.dmytrodanylyk.MyApplication
 import com.dmytrodanylyk.R
-import kotlinx.android.synthetic.main.fragment_button.*
+import kotlinx.android.synthetic.main.fragment_cancel.*
 import kotlinx.android.synthetic.main.include_long_run.*
 import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class LaunchTimeoutFragment : Fragment(), LongRunAware {
+class LongRunningFragment : Fragment(), LongRunAware {
+
+    override fun updateCounter(progress: String) {
+        counter.text = progress
+    }
 
     private val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
     private val dataProvider = DataProvider()
     private lateinit var job: Job
 
     companion object {
-        const val TAG = "LaunchTimeoutFragment"
+        const val TAG = "LaunchFragment"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,18 +32,22 @@ class LaunchTimeoutFragment : Fragment(), LongRunAware {
         job = Job()
     }
 
-    override fun updateCounter(progress: String) {
-        longRunCounter.text = progress
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_button, container, false)
+        return inflater.inflate(R.layout.include_long_run, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        button.setOnClickListener { loadData() }
+        longRunButton.setOnClickListener {
+            // if you want to know how coroutine was completed, attach invokeOnCompletion
+            loadData().invokeOnCompletion {
+                if (isAdded && it is CancellationException) { // if coroutine was cancelled
+                    textView.text = "Cancelled"
+                    hideLoading()
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -49,18 +58,32 @@ class LaunchTimeoutFragment : Fragment(), LongRunAware {
     private fun loadData() = GlobalScope.launch(uiDispatcher + job) {
         showLoading()
 
-        val result = withTimeoutOrNull(TimeUnit.SECONDS.toMillis(1)) { dataProvider.loadData() }
+        val result = dataProvider.loadData()
 
-        showText(result ?: "Timeout")
+        launchLongRunningTask()
+
+        showText(result)
         hideLoading()
     }
 
+
+    private fun launchLongRunningTask(){
+        with((activity.application as MyApplication).longRunningJob){
+            setCallback(activity as? LongRunningJob.TaskCallbacks)
+            launchTask()
+        }
+    }
+
+    private fun cancelLongRunningTask(){
+        (activity.application as MyApplication).longRunningJob.cancelTask()
+    }
+
     private fun showLoading() {
-        progressBar.visibility = View.VISIBLE
+        longRunProgressBar.visibility = View.VISIBLE
     }
 
     private fun hideLoading() {
-        progressBar.visibility = View.GONE
+        longRunProgressBar.visibility = View.GONE
     }
 
     private fun showText(data: String) {

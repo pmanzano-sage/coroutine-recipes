@@ -9,6 +9,7 @@ import com.dmytrodanylyk.R
 import com.dmytrodanylyk.launchRetainableTask
 import com.dmytrodanylyk.log
 import kotlinx.android.synthetic.main.fragment_button.*
+import kotlinx.android.synthetic.main.include_long_run.*
 import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.Executors
@@ -38,7 +39,7 @@ class SingleThreadFragment : Fragment(), LongRunAware {
     }
 
     override fun updateCounter(progress: String) {
-        counter.text = progress
+        longRunCounter.text = progress
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

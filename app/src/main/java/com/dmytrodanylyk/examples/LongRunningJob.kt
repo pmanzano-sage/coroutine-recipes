@@ -5,12 +5,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Use [ExtensionsKt.addTaskFragment] to look for an instance of this Fragment.
- *
- * Retained fragments work fine to keep state while rotating screen. But it wont work if you launch a new activity. Since you'll get a brand new instance of the fragment:
- *
- * 2019-03-15 11:25:49.538 12392-12392/com.dmytrodanylyk D/RetainedFragment: [main] RetainedFragment{d925de1 #1 pepe} attaching callback com.dmytrodanylyk.SecondActivity@9f488ad
- * 2019-03-15 11:25:49.603 12392-12392/com.dmytrodanylyk D/RetainedFragment: [main @coroutine#2] RetainedFragment{4dc1152 #1 pepe} about to call com.dmytrodanylyk.MainActivity@6713033
+ * A coroutine scope that allows you to set a callback that will be run on each step.
  */
 class LongRunningJob : CoroutineScope {
     var job = Job()
