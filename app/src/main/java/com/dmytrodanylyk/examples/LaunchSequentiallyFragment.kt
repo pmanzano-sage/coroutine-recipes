@@ -10,9 +10,8 @@ import kotlinx.android.synthetic.main.fragment_button.*
 import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineDispatcher
 
-class LaunchSequentiallyFragment : Fragment() {
+class LaunchSequentiallyFragment : Fragment(), LongRunAware {
 
     private val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
     private val dataProvider = DataProvider()
@@ -25,6 +24,10 @@ class LaunchSequentiallyFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         job = Job()
+    }
+
+    override fun updateCounter(progress: String) {
+        counter.text = progress
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

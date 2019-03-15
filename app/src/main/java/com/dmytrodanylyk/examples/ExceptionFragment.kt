@@ -11,7 +11,8 @@ import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class ExceptionFragment : Fragment() {
+class ExceptionFragment : Fragment(), LongRunAware {
+
 
     private val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
     private val dataProvider = DataProvider()
@@ -24,6 +25,10 @@ class ExceptionFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         job = Job()
+    }
+
+    override fun updateCounter(progress: String) {
+        counter.text = progress
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

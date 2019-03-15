@@ -6,13 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dmytrodanylyk.R
+import com.dmytrodanylyk.log
 import kotlinx.android.synthetic.main.fragment_button.*
 import kotlinx.coroutines.*
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineDispatcher
 
-class LaunchFragment : Fragment() {
+class LaunchFragment : Fragment(), LongRunAware {
 
     private val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
     private val dataProvider = DataProvider()
@@ -25,6 +25,10 @@ class LaunchFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         job = Job()
+    }
+
+    override fun updateCounter(progress: String) {
+        counter.text = progress
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -44,7 +48,7 @@ class LaunchFragment : Fragment() {
 
     private fun loadData() = GlobalScope.launch(uiDispatcher + job) {
         showLoading() // ui thread
-
+        log(TAG, "loadData...")
         val result = dataProvider.loadData() // non ui thread, suspend until finished
 
         showText(result) // ui thread
@@ -66,8 +70,12 @@ class LaunchFragment : Fragment() {
     class DataProvider(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
         suspend fun loadData(): String = withContext(dispatcher) {
+            log(TAG, "data start")
             delay(TimeUnit.SECONDS.toMillis(2)) // imitate long running operation
+            log(TAG, "data end")
             "Data is available: ${Random().nextInt()}"
+
         }
     }
+
 }

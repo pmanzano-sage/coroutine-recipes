@@ -6,20 +6,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.dmytrodanylyk.R
+import com.dmytrodanylyk.launchRetainableTask
+import com.dmytrodanylyk.log
 import kotlinx.android.synthetic.main.fragment_button.*
 import kotlinx.coroutines.*
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
-class ExceptionHandlerFragment : Fragment(), LongRunAware {
+
+/**
+ * Puedo obtener
+ */
+class SingleThreadFragment : Fragment(), LongRunAware {
 
     private val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
-    private val dataProvider = DataProvider()
+
+    private val bgDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val dbDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
     private lateinit var job: Job
 
     companion object {
-        const val TAG = "ExceptionHandlerFragment"
+        const val TAG = "SingleThreadFragment"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,8 +66,10 @@ class ExceptionHandlerFragment : Fragment(), LongRunAware {
     private fun loadData() = GlobalScope.launch(uiDispatcher + exceptionHandler + job) {
         showLoading()
 
-        val result = dataProvider.loadData()
+        val result = singleThreadDispatching(bgDispatcher, dbDispatcher)
         showText(result)
+
+        activity.launchRetainableTask("pepe")
 
         hideLoading()
     }
@@ -74,18 +86,22 @@ class ExceptionHandlerFragment : Fragment(), LongRunAware {
         textView.text = data
     }
 
-    class DataProvider(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
-
-        suspend fun loadData(): String = withContext(dispatcher) {
-            delay(TimeUnit.SECONDS.toMillis(2)) // imitate long running operation
-            mayThrowException()
-            "Data is available: ${Random().nextInt()}"
+    private suspend fun singleThreadDispatching(ctx1: CoroutineDispatcher, ctx2: CoroutineDispatcher ) : String =
+        withContext(ctx1 + CoroutineName("network")) {
+            log(TAG,"Started in ctx1 - My job is ${coroutineContext[Job]}")
+            withContext(ctx2 + CoroutineName("database")) {
+                delay(TimeUnit.SECONDS.toMillis(1))
+                log(TAG,"Working in ctx2 - My job is ${coroutineContext[Job]}")
+                mayThrowException()
+            }
+            delay(TimeUnit.SECONDS.toMillis(1))
+            log(TAG,"Back to ctx1 - My job is ${coroutineContext[Job]}")
+            "returned"
         }
 
-        private fun mayThrowException() {
-            if (Random().nextBoolean()) {
-                throw IllegalArgumentException("Ooops exception occurred")
-            }
+    private fun mayThrowException() {
+        if (Random().nextBoolean()) {
+            throw IllegalArgumentException("Ooops exception occurred")
         }
     }
 }

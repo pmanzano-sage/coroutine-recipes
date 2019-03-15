@@ -1,5 +1,6 @@
 package com.dmytrodanylyk
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.ListFragment
@@ -19,6 +20,8 @@ class SampleListFragment : ListFragment() {
         private const val SAMPLE_EXCEPTION_HANDLER = "6. Exception Handling (handler)"
         private const val SAMPLE_LIFECYCLE = "7. Lifecycle Awareness (LifecycleObserver)"
         private const val SAMPLE_SCOPED_FRAGMENT = "8. Lifecycle Awareness (ScopedFragment)"
+        private const val SAMPLE_SINGLE_THREAD = "9. Single thread"
+        private const val SAMPLE_NEW_ACTIVITY = "10. New activity"
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -33,7 +36,9 @@ class SampleListFragment : ListFragment() {
                 SAMPLE_EXCEPTION,
                 SAMPLE_EXCEPTION_HANDLER,
                 SAMPLE_LIFECYCLE,
-                SAMPLE_SCOPED_FRAGMENT
+                SAMPLE_SCOPED_FRAGMENT,
+                SAMPLE_SINGLE_THREAD,
+                SAMPLE_NEW_ACTIVITY
         )
         listAdapter = ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, list)
         listView.setOnItemClickListener { _, _, position, _ ->
@@ -47,15 +52,22 @@ class SampleListFragment : ListFragment() {
                 SAMPLE_EXCEPTION_HANDLER -> showFragment(ExceptionHandlerFragment(), ExceptionHandlerFragment.TAG)
                 SAMPLE_LIFECYCLE -> showFragment(LifecycleAwareFragment(), LifecycleAwareFragment.TAG)
                 SAMPLE_SCOPED_FRAGMENT -> showFragment(AndroidScopedFragment(), AndroidScopedFragment.TAG)
+                SAMPLE_SINGLE_THREAD -> showFragment(SingleThreadFragment(), SingleThreadFragment.TAG)
+                SAMPLE_NEW_ACTIVITY -> launchActivity()
             }
         }
     }
+
 
     private fun showFragment(fragment: Fragment, tag: String) {
         activity.supportFragmentManager.beginTransaction()
                 .add(R.id.fragmentContainer, fragment, tag)
                 .addToBackStack(tag)
                 .commit()
+    }
+
+    private fun launchActivity(){
+        startActivity(Intent(activity, SecondActivity::class.java))
     }
 }
 
