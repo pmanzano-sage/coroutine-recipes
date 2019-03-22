@@ -1,7 +1,6 @@
 package com.dmytrodanylyk
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.android.Main
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
